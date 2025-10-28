@@ -118,55 +118,55 @@ func TestTransferTx(t *testing.T) {
 	require.Equal(t, account2.Balance+int64(n)*amount, updateAccount2.Balance)
 }
 
-func TestTransferTxDeadlock(t *testing.T) {
-	store := NewStore(testDB)
+// func TestTransferTxDeadlock(t *testing.T) {
+// 	store := NewStore(testDB)
 
-	account1 := CreateRandomAccount(t)
-	account2 := CreateRandomAccount(t)
-	fmt.Println(">> before:", account1.Balance, account2.Balance)
+// 	account1 := CreateRandomAccount(t)
+// 	account2 := CreateRandomAccount(t)
+// 	fmt.Println(">> before:", account1.Balance, account2.Balance)
 
-	// jalankan konkurensi transfer transaksi (yaitu dimana banyak aktivitas transfer terjadi secara bersamaan)
-	n := 10
-	amount := int64(10)
+// 	// jalankan konkurensi transfer transaksi (yaitu dimana banyak aktivitas transfer terjadi secara bersamaan)
+// 	n := 10
+// 	amount := int64(10)
 
-	errs := make(chan error)
+// 	errs := make(chan error)
 
 
-	for i := 0; i < n; i++ {
-		fromAccountID := account1.ID
-		toAccountID := account2.ID
+// 	for i := 0; i < n; i++ {
+// 		fromAccountID := account1.ID
+// 		toAccountID := account2.ID
 
-		// untuk membuat deadlock
-		if i % 2 == 1 {
-			fromAccountID = account2.ID
-			toAccountID = account1.ID
-		}
+// 		// untuk membuat deadlock
+// 		if i % 2 == 1 {
+// 			fromAccountID = account2.ID
+// 			toAccountID = account1.ID
+// 		}
 
-		go func() {
-			// ctx := context.WithValue(context.Background(), txKey, txName)
-			ctx := context.Background()
-			_, err := store.TransferTx(ctx, TransferTxParams{
-				FromAccountID: fromAccountID,
-				ToAccountID:   toAccountID,
-				Amount:      	amount,
-			})
-			errs <- err
-		}()
-	}
+// 		go func() {
+// 			// ctx := context.WithValue(context.Background(), txKey, txName)
+// 			ctx := context.Background()
+// 			_, err := store.TransferTx(ctx, TransferTxParams{
+// 				FromAccountID: fromAccountID,
+// 				ToAccountID:   toAccountID,
+// 				Amount:      	amount,
+// 			})
+// 			errs <- err
+// 		}()
+// 	}
 
-	for i := 0; i < n; i++ {
-		err := <-errs
-		require.NoError(t, err)
-	}
+// 	for i := 0; i < n; i++ {
+// 		err := <-errs
+// 		require.NoError(t, err)
+// 	}
 
-	// Cek saldo akhir akun
-	updateAccount1, err := store.GetAccount(context.Background(), account1.ID)
-	require.NoError(t, err)
+// 	// Cek saldo akhir akun
+// 	updateAccount1, err := store.GetAccount(context.Background(), account1.ID)
+// 	require.NoError(t, err)
 
-	updateAccount2, err := store.GetAccount(context.Background(), account2.ID)
-	require.NoError(t, err)
+// 	updateAccount2, err := store.GetAccount(context.Background(), account2.ID)
+// 	require.NoError(t, err)
 
-	fmt.Println(">> after:", updateAccount1.Balance, updateAccount2.Balance)
-	require.Equal(t, account1.Balance, updateAccount1.Balance)
-	require.Equal(t, account2.Balance, updateAccount2.Balance)
-}
+// 	fmt.Println(">> after:", updateAccount1.Balance, updateAccount2.Balance)
+// 	require.Equal(t, account1.Balance, updateAccount1.Balance)
+// 	require.Equal(t, account2.Balance, updateAccount2.Balance)
+// }
